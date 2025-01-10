@@ -1,0 +1,8 @@
+hello world
+
+{% for entry in entries %}
+  {% for link in entry.links %}
+    {{link.href}}
+  {% endfor %}
+{% endfor %}
+
