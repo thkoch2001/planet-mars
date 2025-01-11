@@ -1,5 +1,7 @@
+use anyhow::Result;
 use feed_rs::model::Entry;
 use feed_rs::model::Feed;
+use ron::ser::{to_string_pretty, PrettyConfig};
 use serde::{Deserialize, Serialize};
 use std::convert::AsRef;
 use std::fs;
@@ -28,43 +30,47 @@ impl FeedStore {
     }
 
     fn slugify_url(url: &Url) -> String {
-        let domain = url.domain().unwrap();
+        let domain = url.domain().unwrap(); // todo don't hide error
         let query = url.query().unwrap_or("");
         slug::slugify(format!("{domain}{}{query}", url.path()))
     }
 
+    fn generic_path(&self, url: &Url, ext: &str) -> String {
+        format!("{}/{}{ext}", self.dir.display(), Self::slugify_url(url))
+    }
+
     fn feed_path(&self, url: &Url) -> String {
-        format!("{}/{}", self.dir.display(), Self::slugify_url(url))
+        self.generic_path(url, "")
     }
 
     fn fetchdata_path(&self, url: &Url) -> String {
-        format!("{}.toml", self.feed_path(url))
+        self.generic_path(url, ".toml")
     }
 
-    pub fn load_fetchdata(&self, url: &Url) -> FetchData {
+    pub fn load_fetchdata(&self, url: &Url) -> Result<FetchData> {
         let path = self.fetchdata_path(url);
-        if !fs::exists(path.clone()).unwrap() {
-            return FetchData::default();
+        if !fs::exists(path.clone())? {
+            return Ok(FetchData::default());
         }
-        toml::from_str(&fs::read_to_string(path).unwrap()).unwrap()
+        Ok(toml::from_str(&fs::read_to_string(path)?)?)
     }
 
-    fn has_changed(&self, url: &Url, new_feed: &Feed) -> bool {
+    fn has_changed(&self, url: &Url, new_feed: &Feed) -> Result<bool> {
         let Some(old_feed) = self.load_feed(url, false) else {
-            return true;
+            return Ok(true);
         };
 
         let mut old_iter = old_feed.entries.iter();
         for new in &new_feed.entries {
             let Some(old) = old_iter.next() else {
-                return true;
+                return Ok(true);
             };
             if old != new {
-                return true;
+                return Ok(true);
             }
         }
         // ignoring any entries left in old_iter
-        false
+        Ok(false)
     }
 
     fn write<P: AsRef<std::path::Path> + std::fmt::Display, C: AsRef<[u8]>>(
@@ -77,7 +83,7 @@ impl FeedStore {
         fs::write(path, contents)
     }
 
-    pub fn store(&self, url: &Url, mut response: Response<Body>) -> bool {
+    pub fn store(&self, url: &Url, mut response: Response<Body>) -> Result<bool> {
         let headers = response.headers();
         let fetchdata = FetchData {
             etag: hv(headers, "etag"),
@@ -94,19 +100,24 @@ impl FeedStore {
             Ok(f) => f,
             Err(e) => {
                 warn!("Error when parsing feed for {url}: {e:?}");
-                return false;
+                return Ok(false);
             }
         };
-        if !self.has_changed(url, &feed) {
-            return false;
+        if !self.has_changed(url, &feed)? {
+            return Ok(false);
         }
         debug!("Storing feed for {url}.");
-        let _ = Self::write(self.feed_path(url), body);
-        let _ = Self::write(
+        // todo don't serialize to string but to writer
+        Self::write(
+            self.generic_path(url, ".ron"),
+            to_string_pretty(&feed, PrettyConfig::default())?,
+        )?;
+        Self::write(self.feed_path(url), body)?;
+        Self::write(
             self.fetchdata_path(url),
             toml::to_string(&fetchdata).unwrap(),
-        );
-        true
+        )?;
+        Ok(true)
     }
 
     fn load_feed(&self, url: &Url, sanitize: bool) -> Option<Feed> {
@@ -132,6 +143,7 @@ impl FeedStore {
                 warn!("Problem parsing feed file for feed {}", feed_config.url);
                 continue;
             };
+
             entries.append(&mut feed.entries);
             // todo also trim mid-way when length > something, trading cpu for memory
         }

@@ -6,14 +6,14 @@ use crate::fetcher::Fetcher;
 use anyhow::Result;
 use clap::Parser;
 use serde::Deserialize;
-use simple_entry::SimpleEntry;
 use std::fs;
 use std::path::PathBuf;
 use url::Url;
 
+//mod atom_serializer;
 mod feed_store;
 mod fetcher;
-mod simple_entry;
+mod template_engine;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -70,40 +70,10 @@ fn fetch(config: &Config, feed_store: &FeedStore) -> Result<bool> {
                 continue;
             }
         };
-        rebuild |= fetcher.fetch(url, feed_store);
+        rebuild |= fetcher.fetch(url, feed_store)?;
     }
     info!("Done fetching. Rebuild needed: {rebuild}");
     Ok(rebuild)
-}
-
-fn build(config: &Config, feed_store: &FeedStore) -> Result<()> {
-    let templates_dir = to_checked_pathbuf(&config.templates_dir);
-    let out_dir = to_checked_pathbuf(&config.out_dir);
-
-    let mut tera = match tera::Tera::new(&format!("{}/*", &templates_dir.display())) {
-        Ok(t) => t,
-        Err(e) => {
-            println!("Parsing error(s): {}", e);
-            ::std::process::exit(1);
-        }
-    };
-    // disable autoescape as this would corrupt urls or the entriy contents. todo check this!
-    tera.autoescape_on(vec![]);
-
-    let mut context = tera::Context::new();
-    let entries: Vec<SimpleEntry> = feed_store
-        .collect(&config.feeds)
-        .into_iter()
-        .map(SimpleEntry::from_feed_entry)
-        .collect();
-    context.insert("entries", &entries);
-
-    for name in tera.get_template_names() {
-        debug!("Processing template {name}");
-        let file = fs::File::create(format!("{}/{name}", out_dir.display()))?;
-        tera.render_to(name, &context, file)?;
-    }
-    Ok(())
 }
 
 fn main() -> Result<()> {
@@ -129,7 +99,7 @@ fn main() -> Result<()> {
     };
 
     if should_build {
-        build(&config, &feed_store)?;
+        template_engine::build(&config, &feed_store)?;
     }
     Ok(())
 }

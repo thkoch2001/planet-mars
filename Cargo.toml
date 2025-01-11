@@ -9,10 +9,11 @@ clap = { version = "*", features = ["derive"] }
 env_logger = "*"
 feed-rs = "*"
 log = "*"
+ron = "*" # todo for development, to check atom-rs internal representation of feeds
 serde = { version = "*", features = ["derive"] }
 slug = "*"
 tera = "*"
 toml = "*"
 ureq = { version = "3.0.0-rc5", features = ["brotli", "charset", "gzip", "native-tls"]}
 url = "*"
-
+quick-xml = { version = "*", features = ["serialize"] }

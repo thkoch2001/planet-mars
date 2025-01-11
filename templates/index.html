@@ -1,3 +1,5 @@
+{% set dateformat = "%d.%m.%Y %H:%M" -%}
+
 <html>
   <head>
     <title>Planet TVL</title>
@@ -5,7 +7,6 @@
     <meta name="generator" content="planet-mars">
     <link rel="shortcut icon" href="/favicon.ico">
     <link rel="stylesheet" href="planet.css" type="text/css">
-    {# todo <link rel="alternate" type="application/rss+xml" title="Planet Haskell RSS Feed" href="rss20.xml"> #}
     <link rel="alternate" type="application/xml+atom" title="Planet Haskell Atom Feed" href="atom.xml">
   </head>
   <body>
@@ -14,17 +15,50 @@
     </header>
     <div id="maincontainer">
       <main>
-        {% for entry in entries %}
+        {% for entry in entries -%}
+          {% if loop.index > 1 -%}
+            <hr class="entry_sep">
+          {% endif -%}
+          {% if entry.links.0 -%}
+            {% set link = entry.links.0.href -%}
+          {% else -%}
+            {% set link = "" -%}
+          {% endif -%}
           <article>
-            <h2><a href="{{entry.link}}">{{ entry.title|striptags }}<a></h2>
-            <date>{% if entry.published %}{{ entry.published | date(format="%Y-%m-%d %H:%M", timezone="Europe/Moscow") }}{% endif %}</date>{# todo: maybe group posts by day? #}
-            <p class="entry_author">{{ entry.author|striptags }}</p>
-            <div class="entry_content">
-              {{ entry.content }}
+            <h2 class="entry_header">
+              <a {% if link -%}href="{{link}}"{% endif -%}>
+                {% if entry.title -%}
+                  {{ entry.title.content|striptags }}
+                {% else -%}
+                  NO TITLE
+                {% endif -%}
+              </a>
+            </h2>
+            <div class="entry_meta">
+              <date>
+                {% if entry.updated -%}
+                  <span>{{ entry.updated | date(format=dateformat) }}</span>
+                {% else -%}
+                  <span>{{ entry.published | date(format=dateformat) }}</span>
+                {% endif -%}
+              </date>
+              {% if entry.authors -%}
+                &mdash; <span class="entry_author">{{ entry.authors.0.name | striptags }}</span>
+              {% endif -%}
             </div>
-            <p><a href="{{entry.link}}">full post</a></p>
+
+            {% if entry.summary -%}
+              <div class="entry_summary">
+                {{ entry.summary.content }}
+              </div>
+            {% endif -%}
+            {% if entry.content -%}
+              <div class="entry_content">
+                {{ entry.content.body }}
+              </div>
+            {% endif -%}
           </article>
-        {% endfor %}
+        {% endfor -%}
       </main>
 
       <aside>

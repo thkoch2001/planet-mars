@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::time::Instant;
 use ureq::tls::{TlsConfig, TlsProvider};
 use ureq::Agent;
@@ -31,8 +32,8 @@ impl Fetcher {
         }
     }
 
-    pub fn fetch(&self, url: Url, feed_store: &FeedStore) -> bool {
-        let fetchdata = feed_store.load_fetchdata(&url);
+    pub fn fetch(&self, url: Url, feed_store: &FeedStore) -> Result<bool> {
+        let fetchdata = feed_store.load_fetchdata(&url)?;
         let mut builder = self
             .agent
             .get(url.to_string())
@@ -48,7 +49,7 @@ impl Fetcher {
         let result = builder.call();
         let duration = start_instant.elapsed();
 
-        let response = result.unwrap(); // todo log and return false
+        let response = result?; // todo log and return false
         debug!(
             "fetched with status {} in {} ms: {url}",
             response.status(),
@@ -56,14 +57,14 @@ impl Fetcher {
         );
         let status = response.status();
         match status.as_u16() {
-            304 => false, // Not Modified -> nothing to do
+            304 => Ok(false), // Not Modified -> nothing to do
             200 => feed_store.store(&url, response),
             _ => {
                 warn!(
                     "HTTP Status {} not implemented for {url}",
                     response.status()
                 );
-                false
+                Ok(false)
             }
         }
     }
