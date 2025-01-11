@@ -13,7 +13,7 @@ use url::Url;
 #[derive(Deserialize, Serialize, Default)]
 pub struct FetchData {
     pub etag: String,
-    pub date: String,
+    pub last_modified: String,
 }
 
 pub struct FeedStore {
@@ -81,7 +81,7 @@ impl FeedStore {
         let headers = response.headers();
         let fetchdata = FetchData {
             etag: hv(headers, "etag"),
-            date: hv(headers, "date"),
+            last_modified: hv(headers, "last_modified"),
         };
 
         let body = response

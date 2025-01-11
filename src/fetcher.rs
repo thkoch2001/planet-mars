@@ -40,8 +40,8 @@ impl Fetcher {
         if !fetchdata.etag.is_empty() {
             builder = builder.header("If-None-Match", fetchdata.etag);
         }
-        if !fetchdata.date.is_empty() {
-            builder = builder.header("If-Modified-Since", fetchdata.date);
+        if !fetchdata.last_modified.is_empty() {
+            builder = builder.header("If-Modified-Since", fetchdata.last_modified);
         }
 
         let start_instant = Instant::now();
