@@ -2,6 +2,12 @@
 name = "planet-mars"
 version = "0.1.0"
 edition = "2021"
+authors = ["Thomas Koch <thomas@koch.ro>"]
+description = "Feed aggregation planet like Planet Venus, produces static HTML and ATOM feed from fetched feeds."
+homepage = "https://github.com/thkoch2001/planet-mars"
+license = "AGPL-3.0-or-later"
+keywords = ["atom", "rss", "planet", "feed", "blogging"]
+categories = ["web-programming"]
 
 [dependencies]
 anyhow = "*"

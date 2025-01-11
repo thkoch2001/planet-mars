@@ -4,8 +4,8 @@
   <link href="https::/planet.tvl.fyi"/>
   <updated>{{now()|date(format="%Y-%m-%dT%H:%M:%SZ")}}</updated>
   <id>https::/planet.tvl.fyi</id>
-  <generator uri="{{ PKG_HOMEPAGE }}" version="{{ PKG_VERSION }}">
-    {{ PKG_NAME }} by {{ PKG_AUTHORS }}
+  <generator uri="{{ PKG_HOMEPAGE|escape }}" version="{{ PKG_VERSION|escape }}">
+    {{ PKG_NAME|escape }} by {{ PKG_AUTHORS|escape }}
   </generator>
   <icon>https://planet.tvl.fyi/logo.svg</icon>
 
