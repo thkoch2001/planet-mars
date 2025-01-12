@@ -15,7 +15,7 @@ pub struct Fetcher {
 impl Fetcher {
     pub fn new(bot_name: &str, from: &str) -> Fetcher {
         let ua_name = format!(
-            "{bot_name}/{} https://{} software: {}",
+            "{bot_name}/{} {} software: {}",
             env!("CARGO_PKG_VERSION"),
             env!("CARGO_PKG_HOMEPAGE"),
             env!("CARGO_PKG_NAME")
