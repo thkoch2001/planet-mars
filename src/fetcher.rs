@@ -14,8 +14,13 @@ pub struct Fetcher {
 
 impl Fetcher {
     pub fn new(bot_name: &str, from: &str) -> Fetcher {
-        // TODO Get URL from a better place, e.g. Cargo.toml?
-        let ua_name = format!("{bot_name}/{} https://TODO", env!("CARGO_PKG_VERSION"));
+        let ua_name = format!(
+            "{bot_name}/{} https://{} software: {}",
+            env!("CARGO_PKG_VERSION"),
+            env!("CARGO_PKG_HOMEPAGE"),
+            env!("CARGO_PKG_NAME")
+        );
+        info!("useragent: {ua_name}");
         let agent = Agent::config_builder()
             .http_status_as_error(false)
             .user_agent(ua_name)
@@ -49,7 +54,7 @@ impl Fetcher {
         let result = builder.call();
         let duration = start_instant.elapsed();
 
-        let response = result?; // todo log and return false
+        let response = result?;
         debug!(
             "fetched with status {} in {} ms: {url}",
             response.status(),

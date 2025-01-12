@@ -1,3 +1,4 @@
+use anyhow::bail;
 use anyhow::Result;
 use feed_rs::model::Entry;
 use feed_rs::model::Feed;
@@ -29,26 +30,32 @@ impl FeedStore {
         }
     }
 
-    fn slugify_url(url: &Url) -> String {
-        let domain = url.domain().unwrap(); // todo don't hide error
+    fn slugify_url(url: &Url) -> Result<String> {
+        let Some(domain) = url.domain() else {
+            bail!("Url has no domain: '{url}'.")
+        };
         let query = url.query().unwrap_or("");
-        slug::slugify(format!("{domain}{}{query}", url.path()))
+        Ok(slug::slugify(format!("{domain}{}{query}", url.path())))
     }
 
-    fn generic_path(&self, url: &Url, ext: &str) -> String {
-        format!("{}/{}{ext}", self.dir.display(), Self::slugify_url(url))
+    fn generic_path(&self, url: &Url, ext: &str) -> Result<String> {
+        Ok(format!(
+            "{}/{}{ext}",
+            self.dir.display(),
+            Self::slugify_url(url)?
+        ))
     }
 
-    fn feed_path(&self, url: &Url) -> String {
+    fn feed_path(&self, url: &Url) -> Result<String> {
         self.generic_path(url, "")
     }
 
-    fn fetchdata_path(&self, url: &Url) -> String {
+    fn fetchdata_path(&self, url: &Url) -> Result<String> {
         self.generic_path(url, ".toml")
     }
 
     pub fn load_fetchdata(&self, url: &Url) -> Result<FetchData> {
-        let path = self.fetchdata_path(url);
+        let path = self.fetchdata_path(url)?;
         if !fs::exists(path.clone())? {
             return Ok(FetchData::default());
         }
@@ -56,7 +63,7 @@ impl FeedStore {
     }
 
     fn has_changed(&self, url: &Url, new_feed: &Feed) -> Result<bool> {
-        let Some(old_feed) = self.load_feed(url, false) else {
+        let Some(old_feed) = self.load_feed(url, false)? else {
             return Ok(true);
         };
 
@@ -90,12 +97,7 @@ impl FeedStore {
             last_modified: hv(headers, "last_modified"),
         };
 
-        let body = response
-            .body_mut()
-            .with_config()
-            //            .limit(MAX_BODY_SIZE)
-            .read_to_vec()
-            .unwrap();
+        let body = response.body_mut().with_config().read_to_vec()?;
         let feed = match feed_rs::parser::parse(body.as_slice()) {
             Ok(f) => f,
             Err(e) => {
@@ -109,39 +111,44 @@ impl FeedStore {
         debug!("Storing feed for {url}.");
         // todo don't serialize to string but to writer
         Self::write(
-            self.generic_path(url, ".ron"),
+            self.generic_path(url, ".ron")?,
             to_string_pretty(&feed, PrettyConfig::default())?,
         )?;
-        Self::write(self.feed_path(url), body)?;
-        Self::write(
-            self.fetchdata_path(url),
-            toml::to_string(&fetchdata).unwrap(),
-        )?;
+        Self::write(self.feed_path(url)?, body)?;
+        Self::write(self.fetchdata_path(url)?, toml::to_string(&fetchdata)?)?;
         Ok(true)
     }
 
-    fn load_feed(&self, url: &Url, sanitize: bool) -> Option<Feed> {
+    fn load_feed(&self, url: &Url, sanitize: bool) -> Result<Option<Feed>> {
         let parser = feed_rs::parser::Builder::new()
             .sanitize_content(sanitize)
             .build();
 
-        let path = self.feed_path(url);
-        if !fs::exists(path.clone()).unwrap() {
-            return None;
+        let path = self.feed_path(url)?;
+        if !fs::exists(path.clone())? {
+            return Ok(None);
         }
-        let file = fs::File::open(path).unwrap();
-        Some(parser.parse(BufReader::new(file)).unwrap())
+        let file = fs::File::open(path)?;
+        Ok(Some(parser.parse(BufReader::new(file))?))
     }
 
     pub fn collect(&self, feed_configs: &Vec<super::FeedConfig>) -> Vec<Entry> {
         let mut entries = vec![];
 
         for feed_config in feed_configs {
-            let url = Url::parse(&feed_config.url).unwrap();
-            let Some(mut feed) = self.load_feed(&url, true) else {
-                // todo error handling!
-                warn!("Problem parsing feed file for feed {}", feed_config.url);
-                continue;
+            let mut feed = match (|| {
+                let url = Url::parse(&feed_config.url)?;
+                self.load_feed(&url, true)
+            })() {
+                Err(e) => {
+                    warn!(
+                        "Problem parsing feed file for feed {}: {e:?}",
+                        feed_config.url
+                    );
+                    continue;
+                }
+                Ok(None) => continue,
+                Ok(Some(f)) => f,
             };
 
             entries.append(&mut feed.entries);

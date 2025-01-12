@@ -3,7 +3,6 @@ Simple planet like planet venus but in rust and maintained.
 ** todo
 Also see todos in the source files
 
-*** TODO error handling everywhere
 *** use a nice lib to process the config file
 - should check whether dirs exists and are writeable
 - should check whether feed urls can be parsed
