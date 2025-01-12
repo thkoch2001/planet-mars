@@ -1,3 +1,25 @@
+//! Planet software to aggregate many feeds into one
+//!
+//! Input feeds are defined in a toml config file given as cmdline
+//! argument. See the [`Config`] struct and the mars.toml.example file.
+//!
+//! The program iterates over all [feed urls], fetches them, stores them in
+//! [feed_dir] and only rebuilds when at least one feed has updates. The
+//! fetcher implements HTTP ETag and LastModified caching.
+//!
+//! During rebuild, all files in [templates_dir] are processed and written to
+//! [out_dir].
+//!
+//! The software is supposed to be run like every 15 minutes.
+//!
+//! Use a reserved (sub)domain to publish the planet! Although this software
+//! tries to sanitize input feeds, there could still be bugs that open the
+//! planets domain to cross-site attacks.
+//!
+//! [templates_dir]: Config#structfield.templates_dir
+//! [feed_dir]: Config#structfield.feed_dir
+//! [out_dir]: Config#structfield.out_dir
+//! [feed urls]: Config#structfield.feeds
 #[macro_use]
 extern crate log;
 
@@ -18,6 +40,7 @@ mod template_engine;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
+    /// config file in toml format
     #[arg(
         short,
         long,
@@ -28,6 +51,7 @@ struct Args {
     no_fetch: bool,
 }
 
+/// Config to be parsed from toml file given as cmdline option
 #[derive(Deserialize)]
 struct Config {
     /// to be used as part of the fetchers username header
@@ -54,8 +78,13 @@ pub fn to_checked_pathbuf(dir: &str) -> PathBuf {
     dir
 }
 
+/// Config for one individual input feed
+///
+/// This is a separate struct in case one wants to configure additional
+/// information in the future.
 #[derive(Deserialize)]
 struct FeedConfig {
+    /// url of an ATOM, RSS or Json feed
     url: String,
 }
 

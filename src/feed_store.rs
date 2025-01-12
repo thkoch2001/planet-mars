@@ -13,6 +13,7 @@ use ureq::http::Response;
 use ureq::Body;
 use url::Url;
 
+/// How many feed entries should be included in the planet
 const ENTRIES_LEN: usize = 10;
 
 #[derive(Deserialize, Serialize, Default)]
