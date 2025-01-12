@@ -13,6 +13,8 @@ use ureq::http::Response;
 use ureq::Body;
 use url::Url;
 
+const ENTRIES_LEN: usize = 10;
+
 #[derive(Deserialize, Serialize, Default)]
 pub struct FetchData {
     pub etag: String,
@@ -132,8 +134,9 @@ impl FeedStore {
         Ok(Some(parser.parse(BufReader::new(file))?))
     }
 
-    pub fn collect(&self, feed_configs: &Vec<super::FeedConfig>) -> Vec<Entry> {
-        let mut entries = vec![];
+    pub fn collect(&self, feed_configs: &Vec<super::FeedConfig>) -> (Vec<Feed>, Vec<Entry>) {
+        let mut feeds = Vec::new();
+        let mut entries = Vec::new();
 
         for feed_config in feed_configs {
             let mut feed = match (|| {
@@ -151,16 +154,20 @@ impl FeedStore {
                 Ok(Some(f)) => f,
             };
 
-            entries.append(&mut feed.entries);
-            // todo also trim mid-way when length > something, trading cpu for memory
+            entries.append(&mut std::mem::take(&mut feed.entries));
+            feeds.push(feed);
+            // optimization to reduce memory usage
+            if entries.len() > 4 * ENTRIES_LEN {
+                entries = trim_entries(entries);
+            }
         }
-        trim_entries(entries)
+        (feeds, trim_entries(entries))
     }
 }
 
 fn trim_entries(mut entries: Vec<Entry>) -> Vec<Entry> {
     entries.sort_by_key(|e| std::cmp::Reverse(e.updated.or(e.published).unwrap_or_default()));
-    entries.truncate(10);
+    entries.truncate(ENTRIES_LEN);
     entries
 }
 

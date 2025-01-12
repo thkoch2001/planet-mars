@@ -63,7 +63,20 @@
 
       <aside>
         <img src="logo.svg">
-        <p>Last updated: {{now()|date(format="%Y-%m-%d %H:%M")}}
+        <p>Last updated: {{now()|date(format="%Y-%m-%d %H:%M")}}</p>
+        <ul>
+          {% for feed in feeds %}
+            <li>
+              <a {% if feed.links.0 %}href="{{feed.links.0.href}}"{% endif -%}>
+                {% if feed.title -%}
+                  {{feed.title.content|striptags}}
+                {% elif feed.authors.0 and feed.authors.0.name %}
+                  {{ feed.authors.0.name }}
+                {% endif -%}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
       </aside>
     </div>
   </body>

@@ -2,7 +2,6 @@ use crate::feed_store::FeedStore;
 use crate::to_checked_pathbuf;
 use crate::Config;
 use anyhow::Result;
-use feed_rs::model::Entry;
 use std::fs::File;
 use tera::Tera;
 
@@ -11,8 +10,9 @@ pub fn build(config: &Config, feed_store: &FeedStore) -> Result<()> {
     let out_dir = to_checked_pathbuf(&config.out_dir);
 
     let mut context = tera::Context::new();
-    let feed_entries: Vec<Entry> = feed_store.collect(&config.feeds);
-    context.insert("entries", &feed_entries);
+    let (feeds, entries) = feed_store.collect(&config.feeds);
+    context.insert("feeds", &feeds);
+    context.insert("entries", &entries);
     context.insert("PKG_AUTHORS", env!("CARGO_PKG_AUTHORS"));
     context.insert("PKG_HOMEPAGE", env!("CARGO_PKG_HOMEPAGE"));
     context.insert("PKG_NAME", env!("CARGO_PKG_NAME"));
