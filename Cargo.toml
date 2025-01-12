@@ -10,16 +10,16 @@ keywords = ["atom", "rss", "planet", "feed", "blogging"]
 categories = ["web-programming"]
 
 [dependencies]
-anyhow = "*"
-clap = { version = "*", features = ["derive"] }
-env_logger = "*"
-feed-rs = "*"
-log = "*"
-ron = "*" # todo for development, to check atom-rs internal representation of feeds
-serde = { version = "*", features = ["derive"] }
-slug = "*"
-tera = "*"
-toml = "*"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+env_logger = "0"
+feed-rs = "2"
+log = "0"
+ron = "0"
+serde = { version = "1", features = ["derive"] }
+slug = "0"
+tera = "1"
+toml = "0"
 ureq = { version = "3.0.0-rc5", features = ["brotli", "charset", "gzip", "native-tls"]}
-url = "*"
-quick-xml = { version = "*", features = ["serialize"] }
+url = "2"
+
