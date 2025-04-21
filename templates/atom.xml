@@ -43,7 +43,7 @@
         {% endif -%}
       {% endfor %}
       {% if entry.content -%}
-        <content {% if entry.content.type %}type="{{ entry.content.type }}"{% endif %} {% if entry.content.src %}type="{{ entry.content.src }}"{% endif %}>
+        <content {% if entry.content.type %}type="{{ entry.content.type }}"{% endif %} {% if entry.content.src %}src="{{ entry.content.src }}"{% endif %}>
           {{ entry.content.body|escape }}
         </content>
       {% endif -%}
