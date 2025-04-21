@@ -1,8 +1,9 @@
 bot_name = "planet-mars"
 feed_dir = "/var/lib/planet-mars/feeds"
-from = "thomas@koch.ro"
+from = "webmaster@emample.com"
 out_dir = "/var/lib/planet-mars/out"
 templates_dir = "/var/lib/planet-mars/templates"
+max_entries = 15
 
 [[feeds]]
 url = "https://blog.fefe.de/rss.xml"
