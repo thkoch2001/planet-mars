@@ -1,6 +1,6 @@
 bot_name = "planet-mars"
 feed_dir = "/var/lib/planet-mars/feeds"
-from = "webmaster@emample.com"
+from = "webmaster@example.com"
 out_dir = "/var/lib/planet-mars/out"
 templates_dir = "/var/lib/planet-mars/templates"
 max_entries = 15

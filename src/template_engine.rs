@@ -33,7 +33,7 @@ pub fn build(config: &Config, feed_store: &FeedStore) -> Result<()> {
 fn create_tera(templates_dir: &str) -> Result<Tera> {
     let dir = to_checked_pathbuf(templates_dir);
     let mut tera = tera::Tera::new(&format!("{}/*", &dir.display()))?;
-    // disable autoescape as this would corrupt urls or the entriy contents. todo check this!
+    // disable autoescape as this would corrupt urls or the entry contents. todo check this!
     tera.autoescape_on(vec![]);
     Ok(tera)
 }
