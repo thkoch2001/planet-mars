@@ -63,6 +63,8 @@
         <aside>
           <img src="logo.svg">
           <p>Last updated: {{now()|date(format="%Y-%m-%d %H:%M")}}</p>
+          <p><a href="atom.xml">Planet Feed (atom)</a></p>
+          <h3>Blogroll</h3>
           <ul>
             {% for feed_url, feed in feeds %}
               <li>
