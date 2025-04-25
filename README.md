@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Thomas Koch <thomas@koch.ro>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 Simple successor to Planet Venus but in Rust and maintained.
 
 Please see the rustdoc of main.rs for further information.

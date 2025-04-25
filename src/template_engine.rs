@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Thomas Koch <thomas@koch.ro>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 use crate::feed_store::FeedStore;
 use crate::to_checked_pathbuf;
 use crate::Config;

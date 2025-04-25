@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Thomas Koch <thomas@koch.ro>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 //! Planet software to aggregate many feeds into one
 //!
 //! Input feeds are defined in a toml config file given as cmdline

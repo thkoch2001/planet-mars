@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Thomas Koch <thomas@koch.ro>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 use anyhow::bail;
 use anyhow::Result;
 use feed_rs::model::Entry;

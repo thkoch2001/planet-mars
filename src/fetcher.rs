@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Thomas Koch <thomas@koch.ro>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 use anyhow::Result;
 use std::time::Instant;
 use ureq::tls::{TlsConfig, TlsProvider};

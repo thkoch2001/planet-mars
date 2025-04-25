@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Thomas Koch <thomas@koch.ro>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 p, h1, h2, h3, h4, h5, h6, small {
     max-width: 48em;
 }

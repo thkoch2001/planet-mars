@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+{#
+SPDX-FileCopyrightText: 2025 Thomas Koch <thomas@koch.ro>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-#}
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Planet TVL</title>
   <link href="https://planet.tvl.fyi"/>
