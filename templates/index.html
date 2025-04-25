@@ -40,13 +40,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                 </a>
               </h2>
               <div class="entry_meta">
-                <date>
-                  {% if entry.updated -%}
-                    <span>{{ entry.updated | date(format=dateformat) }}</span>
-                  {% else -%}
-                    <span>{{ entry.published | date(format=dateformat) }}</span>
-                  {% endif -%}
-                </date>
+                {% if entry.updated -%}{% set entrytime = entry.updated %}
+                {% else -%}{% set entrytime = entry.published %}
+                {% endif -%}
+                <time datetime="{{ entrytime | date(format="%Y-%m-%d %H:%M+0000") }}">
+                    <span>{{ entrytime | date(format=dateformat) }}</span>
+                </time>
                 {% set author = get_author(entry=entry) -%}
                 {% if author -%}
                   &mdash; <span class="entry_author">{{ author | striptags }}</span>
@@ -68,7 +67,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
         <aside>
           <img src="logo.svg">
-          <p>Last updated: {{now()|date(format="%Y-%m-%d %H:%M")}}</p>
+          <p>Last updated: {{now()|date(format=dateformat)}}</p>
           <p><a href="atom.xml">Planet Feed (atom)</a></p>
           <h3>Blogroll</h3>
           <ul>
