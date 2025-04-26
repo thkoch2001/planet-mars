@@ -4,7 +4,7 @@
 
 [package]
 name = "planet-mars"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = ["Thomas Koch <thomas@koch.ro>"]
 description = "Feed aggregation planet like Planet Venus, produces static HTML and ATOM feed from fetched feeds."
