@@ -4,8 +4,8 @@
 
 use anyhow::Result;
 use std::time::Instant;
-use ureq::tls::{TlsConfig, TlsProvider};
 use ureq::Agent;
+use ureq::tls::{TlsConfig, TlsProvider};
 use url::Url;
 
 use crate::FeedStore;

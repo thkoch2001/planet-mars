@@ -2,20 +2,20 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-use anyhow::bail;
 use anyhow::Result;
+use anyhow::bail;
 use feed_rs::model::Entry;
 use feed_rs::model::Feed;
-use ron::ser::{to_string_pretty, PrettyConfig};
+use ron::ser::{PrettyConfig, to_string_pretty};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::convert::AsRef;
 use std::fs;
 use std::io::BufReader;
 use std::path::PathBuf;
+use ureq::Body;
 use ureq::http::HeaderMap;
 use ureq::http::Response;
-use ureq::Body;
 use url::Url;
 
 #[derive(Deserialize, Serialize, Default)]

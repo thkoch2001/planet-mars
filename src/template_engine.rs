@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+use crate::Config;
 use crate::feed_store::FeedStore;
 use crate::to_checked_pathbuf;
-use crate::Config;
 use anyhow::Result;
 use feed_rs::model::Feed;
 use std::collections::HashMap;
 use std::fs::File;
-use tera::{from_value, Tera};
+use tera::{Tera, from_value};
 
 pub fn build(config: &Config, feed_store: &FeedStore) -> Result<()> {
     let mut tera = create_tera(&config.templates_dir)?;
@@ -52,7 +52,7 @@ impl tera::Function for GetAuthorFunction {
             None => {
                 return Err(tera::Error::msg(
                     "No argument of name 'entry' given to function.",
-                ))
+                ));
             }
             Some(val) => from_value(val.clone())?,
         };
