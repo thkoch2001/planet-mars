@@ -71,9 +71,15 @@ SPDX-License-Identifier: AGPL-3.0-or-later
           <p><a href="atom.xml">Planet Feed (atom)</a></p>
           <h3>Blogroll</h3>
           <ul>
-            {% for feed_url, feed in feeds %}
+            {% for feed_url, feed in feeds -%}
+              {% set_global blog_link = "" -%}
+              {% for link in feed.links -%}
+                {% if link.rel in ["", "alternate"] or not link.rel -%}
+                  {% set_global blog_link = link.href -%}
+                {% endif -%}
+              {% endfor -%}
               <li>
-                <a {% if feed.links.0 %}href="{{feed.links.0.href}}"{% endif -%}>
+                <a {% if blog_link != "" %}href="{{blog_link}}"{% endif -%}>
                   {% if feed.title -%}
                     {{feed.title.content|striptags}}
                   {% elif feed.authors.0 and feed.authors.0.name %}
