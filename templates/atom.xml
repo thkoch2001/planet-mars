@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 -#}
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Planet TVL</title>
-  <link href="https://planet.tvl.fyi"/>
+  <link href="https://planet.tvl.fyi" rel="alternate" />
   <updated>{{now()|date(format="%Y-%m-%dT%H:%M:%SZ")}}</updated>
   <id>https://planet.tvl.fyi</id>
   <generator uri="{{ PKG_HOMEPAGE|escape }}" version="{{ PKG_VERSION|escape }}">
@@ -16,18 +16,18 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
   {% for entry in entries %}
     <entry>
-      <id>{{ entry.id }}/planet.tvl.fyi</id>
-      {% if entry.title -%}
-        <title>{{ entry.title.content }}</title>
+      <id>{{ entry.id|escape }}/planet.tvl.fyi</id>
+      {% if entry.title|escape -%}
+        <title>{{ entry.title.content|escape }}</title>
       {% endif -%}
       {% for link in entry.links %}
         <link href="{{ link.href }}" {% if link.rel %}rel="{{ link.rel }}"{% endif %}/>
       {% endfor %}
       {% if entry.updated %}
-        <updated>{{ entry.updated }}</updated>
+        <updated>{{ entry.updated|escape }}</updated>
       {% endif %}
       {% if entry.published %}
-        <published>{{ entry.published }}</published>
+        <published>{{ entry.published|escape }}</published>
       {% endif %}
       {% if entry.summary -%}
         <summary>
@@ -37,10 +37,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
       {% for author in entry.authors %}
         <author>
           {% if author.name -%}
-            <name>{{ author.name }}</name>
+            <name>{{ author.name|escape }}</name>
           {% endif -%}
           {% if author.email -%}
-            <email>{{ author.email }}</email>
+            <email>{{ author.email|escape }}</email>
           {% endif -%}
         </author>
         {% if author.email -%}
