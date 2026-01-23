@@ -2,7 +2,7 @@
 
 pkgs.rustPlatform.buildRustPackage {
   name = "planet-mars";
-  src = depot.third_party.gitignoreSource or (x: x) ./.;
+  src = pkgs.nix-gitignore.gitignoreSource [ ] ./.;
   cargoLock.lockFile = ./Cargo.lock;
 
   nativeBuildInputs = [ pkgs.pkg-config ];
