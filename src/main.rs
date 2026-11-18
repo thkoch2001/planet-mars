@@ -105,7 +105,12 @@ fn fetch(config: &Config, feed_store: &FeedStore) -> Result<bool> {
                 continue;
             }
         };
-        rebuild |= fetcher.fetch(url, feed_store)?;
+        match fetcher.fetch(&url, feed_store) {
+            Ok(updated) => rebuild |= updated,
+            Err(e) => {
+                error!("Error fetching '{url}': {e:?}");
+            }
+        }
     }
     info!("Done fetching. Rebuild needed: {rebuild}");
     Ok(rebuild)

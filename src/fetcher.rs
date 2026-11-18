@@ -41,8 +41,8 @@ impl Fetcher {
         }
     }
 
-    pub fn fetch(&self, url: Url, feed_store: &FeedStore) -> Result<bool> {
-        let fetchdata = feed_store.load_fetchdata(&url)?;
+    pub fn fetch(&self, url: &Url, feed_store: &FeedStore) -> Result<bool> {
+        let fetchdata = feed_store.load_fetchdata(url)?;
         let mut builder = self
             .agent
             .get(url.to_string())
