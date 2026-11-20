@@ -10,6 +10,7 @@ use feed_rs::model::Feed;
 use std::collections::HashMap;
 use std::fs::File;
 use tera::{Kwargs, State, Tera, TeraResult, value::Key};
+use url::Url;
 
 pub fn build(config: &Config, feed_store: &FeedStore) -> Result<()> {
     let (feeds, entries): (HashMap<String, Feed>, _) =
@@ -88,6 +89,10 @@ impl tera::Function<TeraResult<String>> for GetAuthorFunction {
         if authors.is_empty() {
             authors.append(&mut self.find_authors_from_feed(&feed_url));
         }
+
+        if authors.is_empty() {
+            authors.push(get_domain_from_url(&feed_url));
+        }
         Ok(authors.join(", "))
     }
 }
@@ -107,4 +112,10 @@ impl GetAuthorFunction {
 
 fn is_valid_name(n: &String) -> bool {
     !n.is_empty() && n != "unknown" && n != "author"
+}
+
+fn get_domain_from_url(url: &str) -> String {
+    let parsed = Url::parse(url).expect("Failed to parse URL");
+    let host = parsed.host_str().unwrap();
+    host.strip_prefix("www.").unwrap_or(host).to_string()
 }
