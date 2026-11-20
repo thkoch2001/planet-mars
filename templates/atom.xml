@@ -42,10 +42,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
           {% if author.email -%}
             <email>{{ author.email|escape }}</email>
           {% endif -%}
+          {% if author.uri -%}
+            <uri>{{ author.uri }}</uri>
+          {% endif -%}
         </author>
-        {% if author.email -%}
-          <uri>{{ author.uri }}</uri>
-        {% endif -%}
       {% endfor %}
       {% if entry.content -%}
         <content
