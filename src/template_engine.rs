@@ -101,7 +101,7 @@ impl GetAuthorFunction {
         feed.authors
             .clone()
             .into_iter()
-            .map(|x| x.name)
+            .map(|x| x.name.unwrap_or_default())
             .filter(is_valid_name)
             .collect()
     }
