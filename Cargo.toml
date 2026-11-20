@@ -24,7 +24,7 @@ serde = { version = "1", features = ["derive"] }
 slug = "0"
 tera = { version = "2", features = ["glob_fs"] }
 tera-contrib = { version = "*", features = ["date", "regex"] }
-toml = "0"
+toml = "1"
 ureq = { version = "3.0.0-rc5", features = ["brotli", "charset", "gzip", "native-tls"]}
 url = "2"
 
