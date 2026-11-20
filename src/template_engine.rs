@@ -38,8 +38,6 @@ fn create_tera(templates_dir: &str, feeds: &HashMap<String, Feed>) -> Result<Ter
     let dir = to_checked_pathbuf(templates_dir);
     let mut tera = Tera::default();
 
-    // disable autoescape as this would corrupt urls or the entry contents. todo check this!
-    tera.autoescape_on(Vec::<&str>::new());
     tera.register_function("now", tera_contrib::dates::now);
     tera.register_filter("date", tera_contrib::dates::date);
     tera.register_filter("striptags", tera_contrib::regex::striptags);

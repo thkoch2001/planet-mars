@@ -9,50 +9,54 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   <link href="https://planet.tvl.fyi" rel="alternate" />
   <updated>{{now()|date(format="%Y-%m-%dT%H:%M:%SZ")}}</updated>
   <id>https://planet.tvl.fyi</id>
-  <generator uri="{{ PKG_HOMEPAGE|escape }}" version="{{ PKG_VERSION|escape }}">
-    {{ PKG_NAME|escape }} by {{ PKG_AUTHORS|escape }}
+  <generator uri="{{ PKG_HOMEPAGE }}" version="{{ PKG_VERSION }}">
+    {{ PKG_NAME }} by {{ PKG_AUTHORS }}
   </generator>
   <icon>https://planet.tvl.fyi/logo.svg</icon>
 
   {% for entry in entries %}
     <entry>
-      <id>{{ entry.id|escape }}/planet.tvl.fyi</id>
+      <id>{{ entry.id }}/planet.tvl.fyi</id>
       {% if entry.title -%}
-        <title>{{ entry.title.content|escape }}</title>
+        <title>{{ entry.title.content|striptags }}</title>
       {% endif -%}
       {% for link in entry.links %}
-        <link href="{{ link.href }}" {% if link.rel %}rel="{{ link.rel }}"{% endif %}/>
+        <link href="{{ link.href|safe }}" {% if link.rel %}rel="{{ link.rel }}"{% endif %}/>
       {% endfor %}
       {% if entry.updated %}
-        <updated>{{ entry.updated|escape }}</updated>
+        <updated>{{ entry.updated }}</updated>
       {% endif %}
       {% if entry.published %}
-        <published>{{ entry.published|escape }}</published>
+        <published>{{ entry.published }}</published>
       {% endif %}
       {% if entry.summary -%}
         <summary>
-          {{ entry.summary.content|escape }}
+          {{ entry.summary.content|striptags }}
         </summary>
       {% endif -%}
       {% for author in entry.authors %}
         <author>
           {% if author.name -%}
-            <name>{{ author.name|escape }}</name>
+            <name>{{ author.name }}</name>
           {% endif -%}
           {% if author.email -%}
-            <email>{{ author.email|escape }}</email>
+            <email>{{ author.email }}</email>
           {% endif -%}
           {% if author.uri -%}
-            <uri>{{ author.uri }}</uri>
+            <uri>{{ author.uri|safe }}</uri>
           {% endif -%}
         </author>
       {% endfor %}
       {% if entry.content -%}
         <content
-          type="{% if entry.content.type %}{{ entry.content.type }}{% else %}text/html{% endif %}"
-          {% if entry.content.src %}src="{{ entry.content.src }}"{% endif %}
+          type="{{ entry.content.content_type }}"
+          {% if entry.content.src %}src="{{ entry.content.src|safe }}"{% endif %}
         >
-          {{ entry.content.body|escape }}
+          {% if entry.content.content_type in ["application/xhtml+xml", "text/xhtml", "xhtml"] %}
+            {{ entry.content.body|striptags }}
+          {% else %}{# html is sanitized by feed_rs for type=html #}
+            {{ entry.content.body }}
+          {% endif -%}
         </content>
       {% endif -%}
     </entry>

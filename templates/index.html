@@ -31,7 +31,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             {% endif -%}
             <article>
               <h2 class="entry_header">
-                <a {% if link -%}href="{{link}}"{% endif -%}>
+                <a {% if link -%}href="{{link|safe}}"{% endif -%}>
                   {% if entry.title -%}
                     {{ entry.title.content|striptags }}
                   {% else -%}
@@ -48,17 +48,29 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                 </time>
                 {% set author = get_author(entry=entry) -%}
                 {% if author -%}
-                  &mdash; <span class="entry_author">{{ author | striptags }}</span>
+                  &mdash; <span class="entry_author">{{ author }}</span>
                 {% endif -%}
               </div>
 
-              {% if entry.content -%}
-                <div class="entry_content">
-                  {{ entry.content.body }}
+              {% if entry.summary -%}
+                <div class="entry_summary"><!-- content_type: {{ entry.summary.content_type }} -->
+                  {% if entry.summary.content_type ==  "xhtml" %}
+                  {{ entry.summary.content|striptags }}
+                  {% elif entry.summary.content_type in ["text/html", "html"] %}{# html is sanitized by feed_rs for type=html #}
+                    {{ entry.summary.content|safe }}
+                  {% else %}{# html is sanitized by feed_rs for type=html #}
+                    {{ entry.summary.content }}
+                  {% endif -%}
                 </div>
-              {% elif entry.summary -%}
-                <div class="entry_summary">
-                  {{ entry.summary.content }}
+              {% elif entry.content -%}
+                <div class="entry_content"><!-- content_type: {{ entry.content.content_type }} -->
+                  {% if entry.content.content_type in ["application/xhtml+xml", "text/xhtml", "xhtml"] %}
+                    {{ entry.content.body|striptags }}
+                  {% elif entry.content.content_type in ["text/html", "html"] %}{# html is sanitized by feed_rs for type=html #}
+                    {{ entry.content.body|safe }}
+                  {% else %}
+                    {{ entry.content.body }}
+                  {% endif -%}
                 </div>
               {% endif -%}
             </article>
@@ -79,14 +91,18 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                 {% endif -%}
               {% endfor -%}
               <li>
-                <a {% if blog_link != "" %}href="{{blog_link}}"{% endif -%}>
+                <a {% if blog_link != "" %}href="{{blog_link|safe}}"{% endif -%}>
                   {% if feed.title -%}
                     {{feed.title.content|striptags}}
                   {% elif feed.authors[0] and feed.authors[0].name %}
                     {{ feed.authors[0].name }}
+                  {% elif blog_link %}
+                    {{ blog_link }}
+                  {% else %}
+                    {{ feed_url }}
                   {% endif -%}
                 </a>
-                (<a href="{{feed_url}}">feed</a>)
+                (<a href="{{feed_url|safe}}">feed</a>)
               </li>
             {% endfor %}
           </ul>
