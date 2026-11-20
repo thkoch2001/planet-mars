@@ -24,8 +24,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             {% if loop.index > 1 -%}
               <hr class="entry_sep">
             {% endif -%}
-            {% if entry.links.0 -%}
-              {% set link = entry.links.0.href -%}
+            {% if entry.links[0] -%}
+              {% set link = entry.links[0].href -%}
             {% else -%}
               {% set link = "" -%}
             {% endif -%}
@@ -82,8 +82,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                 <a {% if blog_link != "" %}href="{{blog_link}}"{% endif -%}>
                   {% if feed.title -%}
                     {{feed.title.content|striptags}}
-                  {% elif feed.authors.0 and feed.authors.0.name %}
-                    {{ feed.authors.0.name }}
+                  {% elif feed.authors[0] and feed.authors[0].name %}
+                    {{ feed.authors[0].name }}
                   {% endif -%}
                 </a>
                 (<a href="{{feed_url}}">feed</a>)

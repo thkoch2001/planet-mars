@@ -9,22 +9,22 @@ use anyhow::Result;
 use feed_rs::model::Feed;
 use std::collections::HashMap;
 use std::fs::File;
-use tera::{Tera, from_value};
+use tera::{Kwargs, State, Tera, TeraResult, value::Key};
 
 pub fn build(config: &Config, feed_store: &FeedStore) -> Result<()> {
-    let mut tera = create_tera(&config.templates_dir)?;
+    let (feeds, entries): (HashMap<String, Feed>, _) =
+        feed_store.collect(&config.feeds, config.max_entries);
+
+    let tera = create_tera(&config.templates_dir, &feeds)?;
     let out_dir = to_checked_pathbuf(&config.out_dir);
 
     let mut context = tera::Context::new();
-    let (feeds, entries): (HashMap<String, Feed>, _) =
-        feed_store.collect(&config.feeds, config.max_entries);
     context.insert("feeds", &feeds);
     context.insert("entries", &entries);
     context.insert("PKG_AUTHORS", env!("CARGO_PKG_AUTHORS"));
     context.insert("PKG_HOMEPAGE", env!("CARGO_PKG_HOMEPAGE"));
     context.insert("PKG_NAME", env!("CARGO_PKG_NAME"));
     context.insert("PKG_VERSION", env!("CARGO_PKG_VERSION"));
-    tera.register_function("get_author", GetAuthorFunction { feeds });
 
     for name in tera.get_template_names() {
         debug!("Processing template {name}");
@@ -34,11 +34,22 @@ pub fn build(config: &Config, feed_store: &FeedStore) -> Result<()> {
     Ok(())
 }
 
-fn create_tera(templates_dir: &str) -> Result<Tera> {
+fn create_tera(templates_dir: &str, feeds: &HashMap<String, Feed>) -> Result<Tera> {
     let dir = to_checked_pathbuf(templates_dir);
-    let mut tera = tera::Tera::new(&format!("{}/*", &dir.display()))?;
+    let mut tera = Tera::default();
+
     // disable autoescape as this would corrupt urls or the entry contents. todo check this!
-    tera.autoescape_on(vec![]);
+    tera.autoescape_on(Vec::<&str>::new());
+    tera.register_function("now", tera_contrib::dates::now);
+    tera.register_filter("date", tera_contrib::dates::date);
+    tera.register_filter("striptags", tera_contrib::regex::striptags);
+    tera.register_function(
+        "get_author",
+        GetAuthorFunction {
+            feeds: feeds.clone(),
+        },
+    );
+    tera.load_from_glob(&format!("{}/*", &dir.display()))?;
     Ok(tera)
 }
 
@@ -46,24 +57,31 @@ struct GetAuthorFunction {
     feeds: HashMap<String, Feed>,
 }
 
-impl tera::Function for GetAuthorFunction {
-    fn call(&self, args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera::Error> {
-        let entry_val: tera::Map<_, _> = match args.get("entry") {
-            None => {
-                return Err(tera::Error::msg(
-                    "No argument of name 'entry' given to function.",
-                ));
-            }
-            Some(val) => from_value(val.clone())?,
-        };
-
-        let feed_url: String = from_value(entry_val.get("source").unwrap().clone())?;
-        let authors_val: Vec<tera::Map<_, _>> =
-            from_value(entry_val.get("authors").unwrap().clone())?;
+impl tera::Function<TeraResult<String>> for GetAuthorFunction {
+    fn call(&self, kwargs: Kwargs, _: &State) -> TeraResult<String> {
+        let entry_val: tera::Map = kwargs.must_get("entry")?;
+        let feed_url: String = entry_val
+            .get(&Key::from("source"))
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_string();
+        let authors_val: &[tera::Value] = entry_val
+            .get(&Key::from("authors"))
+            .unwrap()
+            .as_array()
+            .unwrap();
 
         let mut authors: Vec<String> = Vec::new();
         for author_val in authors_val {
-            let name: String = from_value(author_val.get("name").unwrap().clone())?;
+            let name: String = author_val
+                .as_map()
+                .unwrap()
+                .get(&Key::from("name"))
+                .unwrap()
+                .as_str()
+                .unwrap()
+                .to_string();
             if is_valid_name(&name) {
                 authors.push(name.clone());
             }
@@ -72,7 +90,7 @@ impl tera::Function for GetAuthorFunction {
         if authors.is_empty() {
             authors.append(&mut self.find_authors_from_feed(&feed_url));
         }
-        Ok(tera::Value::String(authors.join(", ")))
+        Ok(authors.join(", "))
     }
 }
 

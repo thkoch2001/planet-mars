@@ -22,7 +22,8 @@ log = "0"
 ron = "0"
 serde = { version = "1", features = ["derive"] }
 slug = "0"
-tera = "1"
+tera = { version = "2", features = ["glob_fs"] }
+tera-contrib = { version = "*", features = ["date", "regex"] }
 toml = "0"
 ureq = { version = "3.0.0-rc5", features = ["brotli", "charset", "gzip", "native-tls"]}
 url = "2"

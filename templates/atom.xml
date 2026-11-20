@@ -17,7 +17,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   {% for entry in entries %}
     <entry>
       <id>{{ entry.id|escape }}/planet.tvl.fyi</id>
-      {% if entry.title|escape -%}
+      {% if entry.title -%}
         <title>{{ entry.title.content|escape }}</title>
       {% endif -%}
       {% for link in entry.links %}
