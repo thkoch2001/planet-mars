@@ -25,6 +25,6 @@ slug = "0"
 tera = { version = "2", features = ["glob_fs"] }
 tera-contrib = { version = "*", features = ["date", "regex"] }
 toml = "1"
-ureq = { version = "3.0.0-rc5", features = ["brotli", "charset", "gzip", "native-tls"]}
+ureq = { version = "3", features = ["brotli", "charset", "gzip", "native-tls"]}
 url = "2"
 
